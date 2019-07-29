@@ -54,7 +54,7 @@
 		                    <td><%= arr.get(i).getTienganh() %></td>
 		                    <td><%= arr.get(i).getTiengviet()%></td>
 		                    <td class="text-center">
-			                    <a class='btn btn-info btn-xs' href="" onclick="edit()">
+			                    <a class='btn btn-info btn-xs open-button' href="#" onclick="edit('<%= arr.get(i).getTienganh() %>','<%= arr.get(i).getTiengviet()%>',<%= arr.get(i).getId()%>,'<%=word%>','<%=type%>')">
 				                    <span class="glyphicon glyphicon-edit">
 				                    </span> Edit
 			                    </a> 
@@ -74,7 +74,13 @@
 </div>
 </div>
 <div class="form-popup" id="myForm">
-  <form action="add" class="form-container" method="POST">
+<%  try{
+		ArrayList<Word> arr = (ArrayList<Word>)request.getAttribute("listWord");
+	
+		String word = (String)request.getAttribute("word");
+		String type = (String)request.getAttribute("type");
+%>
+  <form action="add?word=<%=word%>&type=<%=type%>&role=admin" class="form-container" method="POST">
     <h1>Them tu moi</h1>
 
     <label for="email"><b>Tieng anh</b></label>
@@ -83,12 +89,47 @@
     <label for="psw"><b>Tieng viet</b></label>
     <input type="text" placeholder="Enter word" name="tiengviet" required>
 
-    <button type="submit" class="btn" onclick="add()">Them moi</button>
+    <button type="submit" class="btn" id="btn-edit" onclick="alertInsert()">Them moi</button>
     <button type="button" class="btn cancel" onclick="closeForm()">Thoat</button>
   </form>
+  
+  <%
+}catch(NullPointerException e){
+	
+}
+  %>
 </div>
+
+<div class="form-popup" id="myFormEdit">
+<%  try{
+		ArrayList<Word> arr = (ArrayList<Word>)request.getAttribute("listWord");
+	
+		String word = (String)request.getAttribute("word");
+		String type = (String)request.getAttribute("type");
+%>
+  <form action="#" class="form-container" method="POST">
+    <h1>Sua</h1>
+
+    <label for="email"><b>Tieng anh</b></label>
+    <input id ="tienganhEdit" type="text" placeholder="Enter word" name="tienganh" required>
+
+    <label for="psw"><b>Tieng viet</b></label>
+    <input id="tiengvietEdit" type="text" placeholder="Enter word" name="tiengviet" required>
+
+    <button type="button" class="btn" id="btn-edit" onclick="update()">Cap nhat</button>
+    <button type="button" class="btn cancel" onclick="closeFormEdit()">Thoat</button>
+  </form>
+  
+  <%
+}catch(NullPointerException e){
+	
+}
+  %>
+</div>
+
 </body>
 <script type="text/javascript">
+   var str;
 	function changeColer1(){
 		document.getElementById("anhviet").style.background  = '#20B2AA';
 		document.getElementById("vietanh").style.background   = '#778899';
@@ -121,9 +162,33 @@
       	document.getElementById("myForm").style.display = "none";
         document.getElementById("text-boxx").style.webkitFilter = "blur(0px)";
     }
-    function add(){
-    	alert("them thanh cong !");
-    }
+    
+    function openFormEdit() {
+	      document.getElementById("myFormEdit").style.display = "block";
+	      document.getElementById("text-boxx").style.webkitFilter = "blur(6px)";
+  }
+  function alertInsert(){
+	  alert("Them thanh cong !")
+  }
+  function closeFormEdit() {
+    	document.getElementById("myFormEdit").style.display = "none";
+        document.getElementById("text-boxx").style.webkitFilter = "blur(0px)";
+  }
+  function update(){
+	   var tienganh = document.getElementById("tienganhEdit").value;
+	   var tiengviet= document.getElementById("tiengvietEdit").value;
+	   window.location=str+"&tienganh="+tienganh+"&tiengviet="+tiengviet;
+	   alert("Cap nhat thanh cong !")
+  }
+   function edit(tienganh,tiengviet,id,word,type){
+   	
+   	console.log(tienganh);
+   	document.getElementById("tienganhEdit").value = tienganh;
+   	document.getElementById("tiengvietEdit").value = tiengviet;
+   	openFormEdit();
+   	str="http://localhost:8080/dict/update?&word="+word+"&type="+type+"&role=admin"+"&id="+id;
+   	
+   }
    
 </script>
 </html>

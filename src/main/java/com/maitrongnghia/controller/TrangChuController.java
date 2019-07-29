@@ -45,23 +45,32 @@ public class TrangChuController {
 
 	@RequestMapping(path="/add",method=RequestMethod.POST)
 	@Transactional
-	public boolean add(@RequestParam String tienganh,@RequestParam String tiengviet,ModelMap modelMap) {
+	public String add(@RequestParam String tienganh,@RequestParam String tiengviet,@RequestParam String word,@RequestParam String type,@RequestParam String role,ModelMap modelMap) {
 		Session session = sessionFactory.getCurrentSession();
 		String sql;
 		Query query;
-		sql = String.format("INSERT INTO Word(tienganh,tiengviet) VALUES('"+tienganh+"','"+tiengviet+"')");
-		try {
-			query = session.createQuery(sql);
-//			query.setParameter("tienganh1",tienganh);
-//			query.setParameter("tiengviet1",tiengviet);
-			query.executeUpdate();
-			
-		}catch(NullPointerException e) {
-			modelMap.addAttribute("status","Them phan tu that bai !");
-			return false;
-		}
+		Word word1 = new Word();
+		word1.setTienganh(tienganh);
+		word1.setTiengviet(tiengviet);
+		session.save(word1);
 		modelMap.addAttribute("status","Them phan tu thanh cong !");
-		return true;
+		return "redirect:search?word="+word+"&type="+type+"&role="+role;
+	}
+	@RequestMapping(path="/update",method=RequestMethod.GET)
+	@Transactional
+	public String updte(@RequestParam String tienganh,@RequestParam String tiengviet,@RequestParam Integer id,@RequestParam String word,@RequestParam String type,@RequestParam String role,ModelMap modelMap) {
+		Session session = sessionFactory.getCurrentSession();
+		String sql;
+		Query query;
+		System.out.println(tienganh + tiengviet + id);
+		sql = "UPDATE Word SET tienganh=:tienganh1, tiengviet=:tiengviet1 WHERE id=:id1";
+		query = session.createQuery(sql);
+		query.setParameter("tienganh1",tienganh);
+		query.setParameter("tiengviet1",tiengviet);
+		query.setParameter("id1",id);
+		query.executeUpdate();
+		modelMap.addAttribute("status","Cap nhat thanh cong !");
+		return "redirect:search?word="+word+"&type="+type+"&role="+role;
 	}
 	@RequestMapping(path="/trangchinh",method=RequestMethod.POST)
 	@Transactional
@@ -140,7 +149,22 @@ public class TrangChuController {
 				
 			} 
 		}else if(type.equals("vietanh")) {
+			sql1 = "FROM Word WHERE tiengviet like '%" + word+"%'" ;
+			query1 = session.createQuery(sql1);
 			
+			sql2 = "SELECT Count(*)FROM Word WHERE tiengviet like '%" + word+"%'";
+			query2 = session.createQuery(sql2);
+			try {
+				arr = (ArrayList<Word>) query1.getResultList();
+				count = (Long) query2.getSingleResult();
+			}catch(NoResultException e) {
+				if(role.equals("admin")) {
+					return "adminSearch";
+				}else {
+					return "userSearch";
+				}
+				
+			} 
 		}else {
 			sql1 = "FROM Word";
 			query1 = session.createQuery(sql1);
