@@ -30,11 +30,16 @@
 		        <tbody>
 		           <%try{ %>
 		           <%   ArrayList<Word> arr = (ArrayList<Word>)request.getAttribute("listWord");
-		           
+		           		String pageCurrent = (String)request.getAttribute("pageCurrent");
+						int count=0;
+		           		if(!pageCurrent.equals("")){
+		           			count = (Integer.parseInt(pageCurrent)-1)*4;
+		           		}
+		           		
 		        	    for (int i = 0; i < arr.size(); i++) {
 		           %>
 						<tr>
-				            <td> <%=i+1%></td>
+				            <td> <%=count + i+1%></td>
 				            <td> <%= arr.get(i).getTienganh() %></td>
 				            <td> <%= arr.get(i).getTiengviet()%></td>
 		        		</tr>
@@ -49,7 +54,31 @@
 		</div>
 	</div>
 	<div class="pagination"> 
-   	  <a href="#">1</a> 
+   		<%try{ %>
+		           <%   ArrayList<Word> arr = (ArrayList<Word>)request.getAttribute("listWord");
+		        	    String word = (String)request.getAttribute("word");
+		        	    String type = (String)request.getAttribute("type");
+		        	    long count = (Long)request.getAttribute("count")-1;
+		        	    String statusInsert= (String)request.getAttribute("status");
+		        	    int sumPage = 0;
+		        	   
+		        	    if(count%4==0){
+		        	    	sumPage = (int)(count/4);
+		        	    }else{
+		        	    	sumPage = ((int)(count/4))+1;
+		        	    }
+		           		for (int i = 1; i <= sumPage; i++) {
+			           		int pageCurrent = i;
+			           		
+			           		String url = "http://localhost:8080/dict/search?word="+word+"&type="+type+"&role=user"+"&pageCurrent="+pageCurrent;
+		           %>
+						 <a href=<%=url%>><%= i %></a> 
+				        <%}%>
+			       <%}catch(NullPointerException e){
+			    	   
+			       }%>
+   	
+   	  
     </div> 
 </body>
 <script type="text/javascript">
@@ -71,7 +100,7 @@
 	        	type="anhviet";
 	        else if(type==2)
 	        	type="vietanh";
-			window.location="http://localhost:8080/dict/search?word="+word+"&type="+type+"&role=user";
+			window.location="http://localhost:8080/dict/search?word="+word+"&type="+type+"&role=user&pageCurrent=1";
 			 return false;
 		}
 		return true;

@@ -46,11 +46,16 @@
 		           <%   ArrayList<Word> arr = (ArrayList<Word>)request.getAttribute("listWord");
 		        	    String word = (String)request.getAttribute("word");
 		        	    String type = (String)request.getAttribute("type");
+		        	    String pageCurrent = (String)request.getAttribute("pageCurrent");
+						int count=0;
+		           		if(!pageCurrent.equals("")){
+		           			count = (Integer.parseInt(pageCurrent)-1)*4;
+		           		}
 		        	    String statusInsert= (String)request.getAttribute("status");
 		           		for (int i = 0; i < arr.size(); i++) {
 		           %>
 						 <tr id = "<%= arr.get(i).getId()%>">
-		                    <td><%=i+1%></td>
+		                    <td><%=count + i+1%></td>
 		                    <td><%= arr.get(i).getTienganh() %></td>
 		                    <td><%= arr.get(i).getTiengviet()%></td>
 		                    <td class="text-center">
@@ -71,6 +76,35 @@
             </table>
         </div>
     </div>
+   	<div class="pagination"> 
+   		<%try{ %>
+		           <%   ArrayList<Word> arr = (ArrayList<Word>)request.getAttribute("listWord");
+		        	    String word = (String)request.getAttribute("word");
+		        	    String type = (String)request.getAttribute("type");
+		        	    
+		        	    long count = (Long)request.getAttribute("count")-1;
+		        	    String statusInsert= (String)request.getAttribute("status");
+		        	    int sumPage = 0;
+		        	   
+		        	    if(count%4==0){
+		        	    	sumPage = (int)(count/4);
+		        	    }else{
+		        	    	sumPage = ((int)(count/4))+1;
+		        	    }
+		           		for (int i = 1; i <= sumPage; i++) {
+			           		int pageCurrent = i;
+			           		
+			           		String url = "http://localhost:8080/dict/search?word="+word+"&type="+type+"&role=admin"+"&pageCurrent="+pageCurrent;
+		           %>
+						 <a href=<%=url%>><%= i %></a> 
+				        <%}%>
+			       <%}catch(NullPointerException e){
+			    	   
+			       }%>
+   	
+   	  
+    </div> 
+   
 </div>
 </div>
 <div class="form-popup" id="myForm">
@@ -147,7 +181,7 @@
 	        	type="anhviet";
 	        else if(type==2)
 	        	type="vietanh";
-			window.location="http://localhost:8080/dict/search?word="+word+"&type="+type+"&role=admin";
+			window.location="http://localhost:8080/dict/search?word="+word+"&type="+type+"&role=admin" + "&pageCurrent=";
 			 return false;
 		}
 		return true;
@@ -177,16 +211,16 @@
   function update(){
 	   var tienganh = document.getElementById("tienganhEdit").value;
 	   var tiengviet= document.getElementById("tiengvietEdit").value;
-	   window.location=str+"&tienganh="+tienganh+"&tiengviet="+tiengviet;
+	   window.location=str+"&tiengviet="+tiengviet;
 	   alert("Cap nhat thanh cong !")
   }
    function edit(tienganh,tiengviet,id,word,type){
-   	
-   	console.log(tienganh);
-   	document.getElementById("tienganhEdit").value = tienganh;
-   	document.getElementById("tiengvietEdit").value = tiengviet;
-   	openFormEdit();
-   	str="http://localhost:8080/dict/update?&word="+word+"&type="+type+"&role=admin"+"&id="+id;
+	    document.getElementById("tienganhEdit").disabled = true;
+	   	console.log(tienganh);
+	   	document.getElementById("tienganhEdit").value = tienganh;
+	   	document.getElementById("tiengvietEdit").value = tiengviet;
+	   	openFormEdit();
+	   	str="http://localhost:8080/dict/update?&word="+word+"&type="+type+"&role=admin"+"&id="+id;
    	
    }
    

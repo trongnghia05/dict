@@ -54,23 +54,21 @@ public class TrangChuController {
 		word1.setTiengviet(tiengviet);
 		session.save(word1);
 		modelMap.addAttribute("status","Them phan tu thanh cong !");
-		return "redirect:search?word="+word+"&type="+type+"&role="+role;
+		return "redirect:search?word="+word+"&type="+type+"&role="+role+"&pageCurrent=";
 	}
 	@RequestMapping(path="/update",method=RequestMethod.GET)
 	@Transactional
-	public String updte(@RequestParam String tienganh,@RequestParam String tiengviet,@RequestParam Integer id,@RequestParam String word,@RequestParam String type,@RequestParam String role,ModelMap modelMap) {
+	public String updte(@RequestParam String tiengviet,@RequestParam Integer id,@RequestParam String word,@RequestParam String type,@RequestParam String role,ModelMap modelMap) {
 		Session session = sessionFactory.getCurrentSession();
 		String sql;
 		Query query;
-		System.out.println(tienganh + tiengviet + id);
-		sql = "UPDATE Word SET tienganh=:tienganh1, tiengviet=:tiengviet1 WHERE id=:id1";
+		sql = "UPDATE Word SET tiengviet=:tiengviet1 WHERE id=:id1";
 		query = session.createQuery(sql);
-		query.setParameter("tienganh1",tienganh);
 		query.setParameter("tiengviet1",tiengviet);
 		query.setParameter("id1",id);
 		query.executeUpdate();
 		modelMap.addAttribute("status","Cap nhat thanh cong !");
-		return "redirect:search?word="+word+"&type="+type+"&role="+role;
+		return "redirect:search?word="+word+"&type="+type+"&role="+role+"&pageCurrent=";
 	}
 	@RequestMapping(path="/trangchinh",method=RequestMethod.POST)
 	@Transactional
@@ -118,13 +116,13 @@ public class TrangChuController {
 			
 		}
 		
-		return "redirect:search?word="+word+"&type="+type+"&role="+role;
+		return "redirect:search?word="+word+"&type="+type+"&role="+role+"&pageCurrent=";
 	}
 	
 	
 	@RequestMapping(path="/search",method=RequestMethod.GET)
 	@Transactional
-	public String search(@RequestParam String word,@RequestParam String type,@RequestParam String role,ModelMap modelMap) {
+	public String search(@RequestParam String word,@RequestParam String type,@RequestParam String role,@RequestParam String pageCurrent,ModelMap modelMap) {
 		Session session = sessionFactory.getCurrentSession();
 		ArrayList<Word> arr = new ArrayList<Word>();
 		Word wordObject;
@@ -132,43 +130,73 @@ public class TrangChuController {
 		long count = 0 ;
 		Query query1,query2;
 		if(type.equals("anhviet")) {
-			sql1 = "FROM Word WHERE tienganh like '%" + word+"%'" ;
-			query1 = session.createQuery(sql1);
-			
-			sql2 = "SELECT Count(*)FROM Word WHERE tienganh like '%" + word+"%'";
-			query2 = session.createQuery(sql2);
 			try {
-				arr = (ArrayList<Word>) query1.getResultList();
+				sql2 = "SELECT Count(*)FROM Word WHERE tienganh like '%" + word+"%'";
+				query2 = session.createQuery(sql2);
 				count = (Long) query2.getSingleResult();
+				sql1 = "FROM Word WHERE tienganh like '%" + word+"%'";
+				query1 = session.createQuery(sql1);
+				if(count>4) {
+					if(pageCurrent.equals("")) {
+						query1.setFirstResult(1);
+						query1.setMaxResults(4);
+					}else {
+						query1.setFirstResult(Integer.parseInt(pageCurrent)*4-3);
+						query1.setMaxResults(4);
+					}
+				}
+				
+				
+				arr = (ArrayList<Word>) query1.getResultList();
 			}catch(NoResultException e) {
 				if(role.equals("admin")) {
 					return "adminSearch";
 				}else {
 					return "userSearch";
 				}
-				
 			} 
 		}else if(type.equals("vietanh")) {
-			sql1 = "FROM Word WHERE tiengviet like '%" + word+"%'" ;
-			query1 = session.createQuery(sql1);
-			
-			sql2 = "SELECT Count(*)FROM Word WHERE tiengviet like '%" + word+"%'";
-			query2 = session.createQuery(sql2);
 			try {
-				arr = (ArrayList<Word>) query1.getResultList();
+				sql2 = "SELECT Count(*)FROM Word WHERE tiengviet like '%" + word+"%'";
+				query2 = session.createQuery(sql2);
 				count = (Long) query2.getSingleResult();
+				sql1 = "FROM Word WHERE tiengviet like '%" + word+"%'";
+				query1 = session.createQuery(sql1);
+				if(count>4) {
+					if(pageCurrent.equals("")) {
+						query1.setFirstResult(1);
+						query1.setMaxResults(4);
+					}else {
+						query1.setFirstResult(Integer.parseInt(pageCurrent)*4-3);
+						query1.setMaxResults(4);
+					}
+				}
+				
+				
+				arr = (ArrayList<Word>) query1.getResultList();
 			}catch(NoResultException e) {
 				if(role.equals("admin")) {
 					return "adminSearch";
 				}else {
 					return "userSearch";
 				}
-				
 			} 
 		}else {
-			sql1 = "FROM Word";
-			query1 = session.createQuery(sql1);
 			try {
+				sql2 = "SELECT Count(*) FROM Word WHERE tienganh like '%" + word+"%'" + "or"+ " tienganh like '%" + word+"%'";
+				query2 = session.createQuery(sql2);
+				count = (Long) query2.getSingleResult();
+				sql1 = "FROM Word WHERE tienganh like '%" + word+"%'" + "or"+ " tienganh like '%" + word+"%'";
+				query1 = session.createQuery(sql1);
+				if(count>4) {
+					if(pageCurrent.equals("")) {
+						query1.setFirstResult(1);
+						query1.setMaxResults(4);
+					}else {
+						query1.setFirstResult(Integer.parseInt(pageCurrent)*4-3);
+						query1.setMaxResults(4);
+					}
+				}
 				arr = (ArrayList<Word>) query1.getResultList();
 			}catch(NoResultException e) {
 				if(role.equals("admin")) {
@@ -181,6 +209,8 @@ public class TrangChuController {
 		modelMap.addAttribute("listWord",arr);
 		modelMap.addAttribute("word",word);
 		modelMap.addAttribute("type",type);
+		modelMap.addAttribute("count",count);
+		modelMap.addAttribute("pageCurrent",pageCurrent);
 		
 		if(role.equals("admin")) {
 			return "adminSearch";
